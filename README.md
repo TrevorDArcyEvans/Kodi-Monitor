@@ -56,6 +56,7 @@ Based on instructions at:
 
 ## Wire up switches
 ![circuit diagram](Kodi-Monitor_bb.png "circuit diagram")
+![pinout diagram](gpio_lightbox.png "pinout diagram")
 
 ## Install Kodi-Monitor
 * edit `/etc/rc.local` and add the following lines:
