@@ -33,26 +33,26 @@ KodiRight = 17
 KodiDown = 15
 
 # Makes a POST call to Kodi RPC API and returns the response
-#
-# GET calls used to work:
-#
-#   https://forum.kodi.tv/showthread.php?tid=324598
-#
-# A major change for Leia onwards is that JSON-RPC no longer accepts many of the commands via HTTP.
-# This is a measure taken for improved security, but no doubt will inconvenience a number of JSON consumers.
-# Although Kodi still accepts HTTP GET requests to JSON it limits all non-POST requests to ReadData permissions only.
-# So when trying to call a modifying JSON-RPC method like Player.PlayPause the following error will be returned:
-# {
-# "jsonrpc": "2.0",
-# "error": {
-#   "code": -32099,
-#   "message": "Bad client permission."
-#   },
-# "id": 1
-# }
-# To make any data modifications you will need to use HTTP POST.
-# See https://github.com/xbmc/xbmc/pull/12281 for more details.
 def SendPostToKodi(host, port, username, password, method):
+  # GET calls used to work:
+  #
+  #   https://forum.kodi.tv/showthread.php?tid=324598
+  #
+  # A major change for Leia onwards is that JSON-RPC no longer accepts many of the commands via HTTP.
+  # This is a measure taken for improved security, but no doubt will inconvenience a number of JSON consumers.
+  # Although Kodi still accepts HTTP GET requests to JSON it limits all non-POST requests to ReadData permissions only.
+  # So when trying to call a modifying JSON-RPC method like Player.PlayPause the following error will be returned:
+  # {
+  # "jsonrpc": "2.0",
+  # "error": {
+  #   "code": -32099,
+  #   "message": "Bad client permission."
+  #   },
+  # "id": 1
+  # }
+  # To make any data modifications you will need to use HTTP POST.
+  # See https://github.com/xbmc/xbmc/pull/12281 for more details.
+
   # build the URL for Kodi
   url = 'http://%s:%s/jsonrpc' %(host, port)
     
@@ -100,48 +100,56 @@ def Input(key):
 
 # callbacks
 def OnKodiUp(channel):
-  print("OnKodiUp")
+  Input("Input.Up")
 
 def OnKodiBack(channel):
-  print("OnKodiBack")
+  Input("Input.Back")
 
 def OnKodiLeft(channel):
-  print("OnKodiLeft")
+  Input("Input.Left")
 
 def OnKodiSelect(channel):
-  print("OnKodiSelect")
+  Input("Input.Select")
 
 def OnKodiRight(channel):
-  print("OnKodiRight")
+  Input("Input.Right")
 
 def OnKodiDown(channel):
-  print("OnKodiDown")
+  Input("Input.Down")
+
+def SetupPins():
+  GPIO.setup(KodiUp, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(KodiBack, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(KodiLeft, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(KodiSelect, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(KodiRight, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(KodiDown, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+def SetupEvents();
+  GPIO.add_event_detect(KodiUp, GPIO.RISING, callback=OnKodiUp, bouncetime=BounceTime)
+  GPIO.add_event_detect(KodiBack, GPIO.RISING, callback=OnKodiBack, bouncetime=BounceTime)
+  GPIO.add_event_detect(KodiLeft, GPIO.RISING, callback=OnKodiLeft, bouncetime=BounceTime)
+  GPIO.add_event_detect(KodiSelect, GPIO.RISING, callback=OnKodiSelect, bouncetime=BounceTime)
+  GPIO.add_event_detect(KodiRight, GPIO.RISING, callback=OnKodiRight, bouncetime=BounceTime)
+  GPIO.add_event_detect(KodiDown, GPIO.RISING, callback=OnKodiDown, bouncetime=BounceTime)
+
+def DumpSettings():
+  # diagnostics
+  print('Settings:')
+  print(f'  KODI_USER_NAME = {KodiUserName}')
+  print(f'  KODI_PASSWORD  = {KodiPassword}')
+  print(f'  KODI_HOST      = {KodiHost}')
+  print(f'  KODI_PORT      = {KodiPort}')
 
 # disable warnings
 GPIO.setwarnings(False)
 
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(KodiUp, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(KodiBack, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(KodiLeft, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(KodiSelect, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(KodiRight, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(KodiDown, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+SetupPins()
+SetupEvents()
 
-GPIO.add_event_detect(KodiUp, GPIO.RISING, callback=OnKodiUp, bouncetime=BounceTime)
-GPIO.add_event_detect(KodiBack, GPIO.RISING, callback=OnKodiBack, bouncetime=BounceTime)
-GPIO.add_event_detect(KodiLeft, GPIO.RISING, callback=OnKodiLeft, bouncetime=BounceTime)
-GPIO.add_event_detect(KodiSelect, GPIO.RISING, callback=OnKodiSelect, bouncetime=BounceTime)
-GPIO.add_event_detect(KodiRight, GPIO.RISING, callback=OnKodiRight, bouncetime=BounceTime)
-GPIO.add_event_detect(KodiDown, GPIO.RISING, callback=OnKodiDown, bouncetime=BounceTime)
-
-# diagnostics
-print('Settings:')
-print(f'  KODI_USER_NAME = {KodiUserName}')
-print(f'  KODI_PASSWORD  = {KodiPassword}')
-print(f'  KODI_HOST      = {KodiHost}')
-print(f'  KODI_PORT      = {KodiPort}')
+DumpSettings()
 
 try:
   while True:
