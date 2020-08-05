@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import os
+import sys
+import json
+import urllib.request
+import base64
+import time
 import RPi.GPIO as GPIO
 
 # Kodi
@@ -26,6 +31,72 @@ KodiEnter = 21
 
 KodiRight = 17
 KodiDown = 15
+
+# Makes a POST call to Kodi RPC API and returns the response
+#
+# GET calls used to work:
+#
+#   https://forum.kodi.tv/showthread.php?tid=324598
+#
+# A major change for Leia onwards is that JSON-RPC no longer accepts many of the commands via HTTP.
+# This is a measure taken for improved security, but no doubt will inconvenience a number of JSON consumers.
+# Although Kodi still accepts HTTP GET requests to JSON it limits all non-POST requests to ReadData permissions only.
+# So when trying to call a modifying JSON-RPC method like Player.PlayPause the following error will be returned:
+# {
+# "jsonrpc": "2.0",
+# "error": {
+#   "code": -32099,
+#   "message": "Bad client permission."
+#   },
+# "id": 1
+# }
+# To make any data modifications you will need to use HTTP POST.
+# See https://github.com/xbmc/xbmc/pull/12281 for more details.
+def SendPostToKodi(host, port, username, password, method):
+  # build the URL for Kodi
+  url = 'http://%s:%s/jsonrpc' %(host, port)
+    
+  # build json data structure to be sent
+  values = {}
+  values["jsonrpc"] = "2.0"
+  values["method"] = method
+  values["id"] = "1"
+
+  headers = {"Content-Type":"application/json",}
+
+  # format data
+  data = json.dumps(values)
+  data = str(data)
+  data = data.encode("utf-8")
+
+  # 'data' field will make the method "POST"
+  req = urllib.request.Request(url, headers=headers, data=data)
+
+  # add base64 encoded Basic Auth header
+  base64string = base64.encodestring(('%s:%s' % (username,password)).encode()).decode().strip()
+  req.add_header("Authorization", "Basic %s" % base64string)
+
+  # wrap RPC call to Kodi in a try: block to allow for graceful error handling
+  try:
+    response = urllib.request.urlopen(req)
+    response = response.read()
+    response = json.loads(response.decode('utf-8'))
+
+    # A lot of the Kodi responses include the value "result", which lets you know how your call went
+    # This logic fork grabs the value of "result" if one is present, and then returns that.
+    # Note, if no "result" is included in the response from Kodi, the JSON response is returned instead.
+    # You can then print out the whole thing, or pull info you want for further processing or additional calls.
+    if 'result' in response:
+      response = response['result']
+
+    # explicitly catch HTTP errors and connection errors
+  except urllib.error.HTTPError as e:
+    response = 'ERROR: ' + str(e.reason)
+
+  return response
+
+def Input(key):
+  return SendPostToKodi(KodiHost, KodiPort, KodiUserName, KodiPassword, key)
 
 # callbacks
 def OnKodiUp(channel):
