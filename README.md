@@ -61,5 +61,11 @@ Based on instructions at:
 ## Install Kodi-Monitor
 * edit `/etc/rc.local` and add the following lines:
 
-  `/home/kodi/Kodi-Monitor/kodiMonitor.py &`
+  ```
+  export KODI_USER_NAME=kodi
+  export KODI_PASSWORD=<your-KODI_PASSWORD-here>
+  export KODI_HOST=localhost
+  export KODI_PORT=8080
+  /home/kodi/Kodi-Monitor/kodiMonitor.py &
+  ```
 
