@@ -25,7 +25,7 @@ KodiLeft = 4
 # The only thing that is special about GPIO27 on Pin 13 is that it was GPIO21 on Rev 1 boards
 #   https://www.raspberrypi.org/forums/viewtopic.php?t=36486
 #
-# $ cat /sys/firmware/devicetree/base/model 
+# $ cat /sys/firmware/devicetree/base/model
 # Raspberry Pi Model B Rev 1
 KodiSelect = 21
 
@@ -55,7 +55,7 @@ def SendPostToKodi(host, port, username, password, method):
 
   # build the URL for Kodi
   url = 'http://%s:%s/jsonrpc' %(host, port)
-    
+
   # build json data structure to be sent
   values = {}
   values["jsonrpc"] = "2.0"
@@ -125,7 +125,7 @@ def SetupPins():
   GPIO.setup(KodiRight, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
   GPIO.setup(KodiDown, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-def SetupEvents();
+def SetupEvents():
   GPIO.add_event_detect(KodiUp, GPIO.RISING, callback=OnKodiUp, bouncetime=BounceTime)
   GPIO.add_event_detect(KodiBack, GPIO.RISING, callback=OnKodiBack, bouncetime=BounceTime)
   GPIO.add_event_detect(KodiLeft, GPIO.RISING, callback=OnKodiLeft, bouncetime=BounceTime)
@@ -146,12 +146,12 @@ GPIO.setwarnings(False)
 
 GPIO.setmode(GPIO.BCM)
 
-SetupPins()
-SetupEvents()
-
-DumpSettings()
-
 try:
+  SetupPins()
+  SetupEvents()
+
+  DumpSettings()
+
   while True:
     pass
 
